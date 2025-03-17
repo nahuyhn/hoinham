@@ -34,49 +34,16 @@ body, html {
 <!-- Main Content -->
 <div class="w3-container w3-padding-64 w3-light-grey">
   <h2 class="w3-center">SỐ BÀI ĐĂNG CÁC THÀNH VIÊN</h2>
-  <table class="w3-table w3-bordered w3-striped w3-large w3-center">
-    <tr class="w3-black">
-      <th>Hạng</th>
-      <th>Người dùng</th>
-      <th>BÀI ĐĂNG</th>
-    </tr>
-    <tr>
-      <td>1</td>
-      <td>LEAF</td>
-      <td>10</td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td>AN</td>
-      <td>3</td>
-    </tr>
-    <tr>
-      <td>3</td>
-      <td>KH2NG</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <td>4</td>
-      <td>TUAN ANH MAI</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <td>5</td>
-      <td>HUYEN</td>
-      <td>1</td>
-    </tr>
+  <table id="rankingTable" class="w3-table w3-bordered w3-striped w3-large w3-center">
+    <!-- Dữ liệu từ Google Sheets sẽ được thêm vào đây -->
   </table>
 </div>
 
-<div class="w3-container w3-padding-64">
+<div class="w3-container w3-padding-64 w3-white">
   <h2 class="w3-center">BÀI ĐĂNG NỔI BẬT</h2>
-  <ul class="w3-ul w3-card-4">
-    <li class="w3-padding-16"><b>Mo#1:</b> <a href="https://www.facebook.com/hoinhamo/posts/pfbid02432eMKxCVh613zLTFAwFoxWZhURzdKuriHWQj6uczaW4Ad4r9SynvnAN1nLN3g7Yl" target="_blank">"Để tìm"</a></li>
-    <li class="w3-padding-16"><b>Mo#2:</b> <a href="https://www.facebook.com/hoinhamo/posts/pfbid0ZLLeG4XZMsDCBaALUjqqixWY4tVtSCDRwmURJYNdeURA1zHuxxBe69YR5zBGhrd1l" target="_blank">"Metro"</a></li>
-    <li class="w3-padding-16"><b>Mo#3:</b> <a href="https://www.facebook.com/reel/1140798754065024" target="_blank">"I want to quietly find my way into your world, to be a part of your story."</a></li>
-    <li class="w3-padding-16"><b>Mo#4:</b> <a href="https://www.facebook.com/share/v/1CC9648Ajk/" target="_blank">"Những điều bạn chưa biết"</a></li>
-    <li class="w3-padding-16"><b>Mo#5:</b> <a href="https://www.facebook.com/hoinhamo/posts/pfbid02r5sWDmkUhmAUCN23wCbm7J7QnD9EEtvHAP8TV4PSahctgDUiY53NB83KNtsED6ZCl" target="_blank">"Chia sẻ cảm xúc"</a></li>
-  </ul>
+  <table id="featuredPostsTable" class="w3-table w3-bordered w3-striped w3-large w3-center">
+    <!-- Dữ liệu từ Google Sheets sẽ được thêm vào đây -->
+  </table>
 </div>
 
 <!-- Back Home Button -->
@@ -88,5 +55,70 @@ body, html {
 <footer class="w3-center w3-light-grey w3-padding-48 w3-large">
   <p>Template by w3.css and remake by @hoinhamo</p>
 </footer>
+
+<script>
+  async function fetchGoogleSheet(url, tableId, isFeaturedPosts = false) {
+    const response = await fetch(url + "&_=" + new Date().getTime());
+    const text = await response.text();
+    const rows = text.trim().split("\n").map(row => row.split(","));
+
+    let table = document.getElementById(tableId);
+    table.innerHTML = ""; // Xóa nội dung cũ
+
+    // ✅ Tạo header của bảng
+    let headerRow = document.createElement("tr");
+    headerRow.classList.add("w3-black");
+
+    // Nếu là bảng bài đăng nổi bật, chỉ hiển thị hai cột đầu
+    let headers = isFeaturedPosts ? rows[0].slice(0, 2) : rows[0];
+
+    headers.forEach(header => {
+        let th = document.createElement("th");
+        th.innerText = header;
+        headerRow.appendChild(th);
+    });
+    table.appendChild(headerRow);
+
+    // ✅ Thêm dữ liệu bảng với định dạng mong muốn
+    for (let i = 1; i < rows.length; i++) {
+        let row = document.createElement("tr");
+
+        if (isFeaturedPosts) {
+            // Chỉ hiển thị 2 cột đầu, cột thứ 3 được dùng làm link
+            let postName = rows[i][1]; // Cột tiêu đề bài viết
+            let postLink = rows[i][2]; // Cột chứa URL
+
+            let tdIndex = document.createElement("td");
+            tdIndex.innerText = rows[i][0]; // Chỉ số bài viết
+            row.appendChild(tdIndex);
+
+            let tdTitle = document.createElement("td");
+            let link = document.createElement("a");
+            link.href = postLink;
+            link.target = "_blank";
+            link.innerText = postName;
+            tdTitle.appendChild(link);
+            row.appendChild(tdTitle);
+        } else {
+            // Hiển thị toàn bộ dữ liệu bảng xếp hạng
+            rows[i].forEach(cell => {
+                let td = document.createElement("td");
+                td.innerText = cell;
+                row.appendChild(td);
+            });
+        }
+
+        table.appendChild(row);
+    }
+}
+
+// 🔹 Link Google Sheets (CSV format)
+const rankingSheet = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqFNsVD_XAHVuNjd7Uve62OMe7yo1RvTYA6U0bpUEVtRcJUcj4XT2o4KSsYLG6WplDwaieFijG9X9Q/pub?output=csv";
+const featuredPostsSheet = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSDFNMBktXe4yH76HjfIDzusnyLrkLSMFYV3SfkgoBLaWq5sBxmrnSlReReI2UscZDUJ6u43mrTi51N/pub?output=csv";
+
+// 🔹 Gọi hàm fetch dữ liệu cho cả hai bảng
+fetchGoogleSheet(rankingSheet, "rankingTable");
+fetchGoogleSheet(featuredPostsSheet, "featuredPostsTable", true);
+</script>
 </body>
 </html>
