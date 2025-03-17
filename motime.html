@@ -1,74 +1,92 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>@hoinhamo</title>
+<title>@hoinhamo - Bảng Xếp Hạng</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
-<script async defer crossorigin="anonymous" 
-  src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"></script>
-<script>
-    window.fbAsyncInit = function() {
-      FB.init({
-        xfbml: true,
-        version: 'v18.0'
-      });
-    };
-</script>
 <style>
 body, html {
   height: 100%;
   font-family: "Inconsolata", sans-serif;
 }
-
 .bgimg {
   background-position: center;
   background-size: cover;
   background-image: url("/image-web/header2.jpg");
   min-height: 75%;
 }
-
-.menu {
-  display: none;
-}
 </style>
 </head>
 <body>
 
-<!-- Links (sit on top) -->
+<!-- Navbar -->
 <div class="w3-top">
   <div class="w3-row w3-padding w3-black">
-    <div class="w3-col s3">
-      <a href="index.html" class="w3-button w3-block w3-black">NHÀ</a>
-    </div>
-    <div class="w3-col s3">
-      <a href="about.html" class="w3-button w3-block w3-black">VỀ CHÚNG MÌNH</a>
-    </div>
-    <div class="w3-col s3">
-      <a href="contact.html" class="w3-button w3-block w3-black">LIÊN KẾT</a>
-    </div>
-    <div class="w3-col s3">
-      <a href="motime.html" class="w3-button w3-block w3-black">!ĐẶC BIỆT!</a>
-    </div>
+    <div class="w3-col s3"><a href="index.html" class="w3-button w3-block w3-black">NHÀ</a></div>
+    <div class="w3-col s3"><a href="about.html" class="w3-button w3-block w3-black">VỀ CHÚNG MÌNH</a></div>
+    <div class="w3-col s3"><a href="contact.html" class="w3-button w3-block w3-black">LIÊN KẾT</a></div>
+    <div class="w3-col s3"><a href="motime.html" class="w3-button w3-block w3-black">!ĐẶC BIỆT!</a></div>
   </div>
 </div>
 
-<!-- Add a background color and large text to the whole page -->
-<div class="w3-sand w3-large">
-
-<div class="w3-center w3-padding-64">
-    <a href="index.html" class="w3-button w3-black w3-padding-large w3-round">
-      VỀ NHÀ
-    </a>
+<!-- Main Content -->
+<div class="w3-container w3-padding-64 w3-light-grey">
+  <h2 class="w3-center">SỐ BÀI ĐĂNG CÁC THÀNH VIÊN</h2>
+  <table class="w3-table w3-bordered w3-striped w3-large w3-center">
+    <tr class="w3-black">
+      <th>Hạng</th>
+      <th>Người dùng</th>
+      <th>BÀI ĐĂNG</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>LEAF</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>AN</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>KH2NG</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>TUAN ANH MAI</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>HUYEN</td>
+      <td>1</td>
+    </tr>
+  </table>
 </div>
 
+<div class="w3-container w3-padding-64">
+  <h2 class="w3-center">BÀI ĐĂNG NỔI BẬT</h2>
+  <ul class="w3-ul w3-card-4">
+    <li class="w3-padding-16"><b>Mo#1:</b> <a href="https://www.facebook.com/hoinhamo/posts/pfbid02432eMKxCVh613zLTFAwFoxWZhURzdKuriHWQj6uczaW4Ad4r9SynvnAN1nLN3g7Yl" target="_blank">"Để tìm"</a></li>
+    <li class="w3-padding-16"><b>Mo#2:</b> <a href="https://www.facebook.com/hoinhamo/posts/pfbid0ZLLeG4XZMsDCBaALUjqqixWY4tVtSCDRwmURJYNdeURA1zHuxxBe69YR5zBGhrd1l" target="_blank">"Metro"</a></li>
+    <li class="w3-padding-16"><b>Mo#3:</b> <a href="https://www.facebook.com/reel/1140798754065024" target="_blank">"I want to quietly find my way into your world, to be a part of your story."</a></li>
+    <li class="w3-padding-16"><b>Mo#4:</b> <a href="https://www.facebook.com/share/v/1CC9648Ajk/" target="_blank">"Những điều bạn chưa biết"</a></li>
+    <li class="w3-padding-16"><b>Mo#5:</b> <a href="https://www.facebook.com/hoinhamo/posts/pfbid02r5sWDmkUhmAUCN23wCbm7J7QnD9EEtvHAP8TV4PSahctgDUiY53NB83KNtsED6ZCl" target="_blank">"Chia sẻ cảm xúc"</a></li>
+  </ul>
+</div>
 
-
+<!-- Back Home Button -->
+<div class="w3-center w3-padding-64">
+    <a href="index.html" class="w3-button w3-black w3-padding-large w3-round">VỀ NHÀ</a>
+</div>
 
 <!-- Footer -->
 <footer class="w3-center w3-light-grey w3-padding-48 w3-large">
-  <p>Template by w3.css and remake by @hoinhamo</a></p>
+  <p>Template by w3.css and remake by @hoinhamo</p>
 </footer>
 </body>
 </html>
