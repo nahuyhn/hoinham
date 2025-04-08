@@ -116,11 +116,17 @@
     }
 
     function approvePost(id) {
-      db.collection("posts").doc(id).update({ approved: true }).then(() => {
-        alert("Đã duyệt bài viết!");
-        loadPosts();
-      });
-    }
+  db.collection("posts").doc(id).update({ 
+    approved: true,
+    adminToken: "123" // thêm dòng này để Firestore cho phép
+  }).then(() => {
+    alert("Đã duyệt bài viết!");
+    loadPosts();
+  }).catch(error => {
+    console.error("Lỗi duyệt bài:", error);
+    alert("Duyệt bài thất bại. Xem console.");
+  });
+}
 
     function deletePost(id) {
       if (confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {
