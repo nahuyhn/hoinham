@@ -8,6 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <style>
     body {
@@ -64,13 +65,13 @@
   <form id="postForm" style="display:none;">
     <input type="text" id="title" placeholder="Tiêu đề bài viết" required>
     <textarea id="content" placeholder="Nội dung bài viết" required></textarea>
+    <input type="file" id="image" accept="image/*">
     <button type="submit">Đăng bài</button>
     <button type="button" id="logoutBtn">Đăng xuất</button>
   </form>
 </div>
 
 <script>
-  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyDbKvZO0GhX-e43jJ9xhUuW7jlSqxyIHQo",
     authDomain: "hoinhamo1.firebaseapp.com",
@@ -80,23 +81,21 @@
     appId: "1:39644722511:web:4fe4296d138205e3d0413a",
     measurementId: "G-47QL2JXV49"
   };
+
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
+  const storage = firebase.storage();
 
-  // Đăng nhập bằng Google
   function loginWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
-      .then(result => {
-        console.log("Đã đăng nhập:", result.user.displayName);
-      })
       .catch(error => {
         console.error("Lỗi đăng nhập:", error);
+        alert("❌ Lỗi đăng nhập: " + error.message);
       });
   }
 
-  // Theo dõi trạng thái đăng nhập
   auth.onAuthStateChanged(user => {
     const postForm = document.getElementById("postForm");
     const loginSection = document.getElementById("loginSection");
@@ -113,33 +112,47 @@
     }
   });
 
-  // Gửi bài viết
-  const form = document.getElementById("postForm");
-  form.addEventListener("submit", async (e) => {
+  document.getElementById("postForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const title = document.getElementById("title").value.trim();
     const content = document.getElementById("content").value.trim();
+    const imageFile = document.getElementById("image").files[0];
     const user = auth.currentUser;
 
-    if (title && content && user) {
+    if (!title || !content) {
+      alert("Vui lòng điền tiêu đề và nội dung.");
+      return;
+    }
+
+    let imageUrl = "";
+    if (imageFile) {
       try {
-        await db.collection("posts").add({
-          title,
-          content,
-          author: user.displayName,
-          email: user.email,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        alert("✅ Bài viết đã được đăng!");
-        form.reset();
+        const imageRef = storage.ref("post_images/" + Date.now() + "_" + imageFile.name);
+        const snapshot = await imageRef.put(imageFile);
+        imageUrl = await snapshot.ref.getDownloadURL();
       } catch (error) {
-        console.error("❌ Lỗi khi đăng bài:", error);
-        alert("Có lỗi xảy ra khi đăng bài.");
+        console.error("Lỗi khi tải ảnh:", error);
+        alert("Không thể tải ảnh lên.");
       }
+    }
+
+    try {
+      await db.collection("posts").add({
+        title,
+        content,
+        imageUrl,
+        author: user.displayName,
+        email: user.email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert("✅ Bài viết đã được đăng!");
+      document.getElementById("postForm").reset();
+    } catch (error) {
+      console.error("❌ Lỗi khi đăng bài:", error);
+      alert("Có lỗi xảy ra khi đăng bài.");
     }
   });
 
-  // Đăng xuất
   document.getElementById("logoutBtn").addEventListener("click", () => {
     auth.signOut();
   });
