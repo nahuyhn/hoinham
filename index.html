@@ -2,98 +2,83 @@
 <html>
 <head>
 <title>@hoinhamo</title>
-<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js"></script>
+<!-- Firebase App (the core Firebase SDK) -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<!-- Add Firestore -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
 <script async defer crossorigin="anonymous" 
   src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"></script>
-<script>
-// Firebase config từ console
-const firebaseConfig = {
-  apiKey: "AIzaSyDbKvZO0GhX-e43jJ9xhUuW7jlSqxyIHQo",
-  authDomain: "hoinhamo1.firebaseapp.com",
-  projectId: "hoinhamo1",
-  storageBucket: "hoinhamo1.firebasestorage.app",
-  messagingSenderId: "39644722511",
-  appId: "1:39644722511:web:4fe4296d138205e3d0413a",
-  measurementId: "G-47QL2JXV49"
-};
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-// Xử lý form gửi bài
-document.getElementById("postForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const title = document.getElementById("title").value.trim();
-  const content = document.getElementById("content").value.trim();
-
-  if (title && content) {
-    try {
-      await db.collection("posts").add({
-        title,
-        content,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      alert("✅ Bài viết đã được đăng!");
-      document.getElementById("postForm").reset();
-    } catch (error) {
-      console.error("❌ Lỗi khi đăng bài:", error);
-      alert("Có lỗi xảy ra khi đăng bài.");
-    }
-  } else {
-    alert("⛔ Vui lòng điền đầy đủ tiêu đề và nội dung.");
-  }
-});
-// Khởi tạo
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// Lưu bài viết
-document.getElementById("postForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const title = document.getElementById("title").value;
-  const content = document.getElementById("content").value;
-
-  if (title && content) {
-    await db.collection("posts").add({
-      title,
-      content,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  <script>
+    // Firebase config mới (thay bằng config thật của bạn)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDbKvZO0GhX-e43jJ9xhUuW7jlSqxyIHQo",
+      authDomain: "hoinhamo1.firebaseapp.com",
+      projectId: "hoinhamo1",
+      storageBucket: "hoinhamo1.firebasestorage.app",
+      messagingSenderId: "39644722511",
+      appId: "1:39644722511:web:4fe4296d138205e3d0413a",
+      measurementId: "G-47QL2JXV49"
+    };
+    
+    // Khởi tạo Firebase với config mới
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    // Đăng bài viết
+    document.getElementById("postForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+    
+      const title = document.getElementById("title").value.trim();
+      const content = document.getElementById("content").value.trim();
+    
+      if (title && content) {
+        try {
+          await db.collection("posts").add({
+            title,
+            content,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          alert("✅ Bài viết đã được đăng!");
+          document.getElementById("postForm").reset();
+          loadPosts();
+        } catch (error) {
+          console.error("❌ Lỗi khi đăng bài:", error);
+          alert("Có lỗi xảy ra khi đăng bài.");
+        }
+      } else {
+        alert("⛔ Vui lòng điền đầy đủ tiêu đề và nội dung.");
+      }
     });
-    document.getElementById("postForm").reset();
+    
+    // Hiển thị bài viết
+    async function loadPosts() {
+      const postsDiv = document.getElementById("posts");
+      postsDiv.innerHTML = "";
+      const snapshot = await db.collection("posts").orderBy("createdAt", "desc").get();
+      snapshot.forEach(doc => {
+        const post = doc.data();
+        postsDiv.innerHTML += `
+          <h2>${post.title}</h2>
+          <p>${post.content}</p>
+          <hr>
+        `;
+      });
+    }
+    
+    // Gọi khi tải trang
     loadPosts();
-  }
-});
-
-// Hiển thị bài viết
-async function loadPosts() {
-  const postsDiv = document.getElementById("posts");
-  postsDiv.innerHTML = "";
-  const snapshot = await db.collection("posts").orderBy("createdAt", "desc").get();
-  snapshot.forEach(doc => {
-    const post = doc.data();
-    postsDiv.innerHTML += `
-      <h2>${post.title}</h2>
-      <p>${post.content}</p>
-      <hr>
-    `;
-  });
-}
-
-// Gọi khi tải trang
-loadPosts();
-
+    
     window.fbAsyncInit = function() {
       FB.init({
         xfbml: true,
         version: 'v18.0'
       });
     };
-</script>
+    </script>
 <style>
 html, body {
   overflow-x: hidden;
