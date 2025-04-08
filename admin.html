@@ -45,6 +45,7 @@
   <div id="postsContainer" style="display:none;"></div>
 
   <script>
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDbKvZO0GhX-e43jJ9xhUuW7jlSqxyIHQo",
       authDomain: "hoinhamo1.firebaseapp.com",
@@ -57,7 +58,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    const adminEmail = "huynhbinhan.n@gmail.com";
+    const adminEmail = "youradmin@gmail.com"; // THAY BẰNG EMAIL ADMIN CỦA BẠN
 
     function login() {
       const provider = new firebase.auth.GoogleAuthProvider();
@@ -96,7 +97,7 @@
               <h3>${post.title}</h3>
               <p>${post.content}</p>
               ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Ảnh bài đăng">` : ""}
-              <p><strong>Người đăng:</strong> ${post.author || "Ẩn danh"} | <strong>Email:</strong> ${post.email || "Không có"}</p>
+              <p><strong>Người đăng:</strong> ${post.author} | <strong>Email:</strong> ${post.email}</p>
               <p><strong>Trạng thái:</strong> ${post.approved ? "✅ Đã duyệt" : "⏳ Chờ duyệt"}</p>
               ${!post.approved ? `<button onclick="approvePost('${doc.id}')">✔️ Duyệt bài</button>` : ""}
               <button onclick="deletePost('${doc.id}')">🗑️ Xoá bài</button>
@@ -110,20 +111,20 @@
     }
 
     function approvePost(id) {
-      db.collection("posts").doc(id).update({ approved: true })
-        .then(() => {
-          alert("✅ Bài viết đã được duyệt.");
-          loadPosts();
-        });
+      db.collection("posts").doc(id).update({
+        approved: true
+      }).then(() => {
+        alert("✅ Bài viết đã được duyệt.");
+        loadPosts();
+      });
     }
 
     function deletePost(id) {
       if (confirm("Bạn có chắc muốn xoá bài viết này?")) {
-        db.collection("posts").doc(id).delete()
-          .then(() => {
-            alert("🗑️ Đã xoá bài viết.");
-            loadPosts();
-          });
+        db.collection("posts").doc(id).delete().then(() => {
+          alert("🗑️ Đã xoá bài viết.");
+          loadPosts();
+        });
       }
     }
   </script>
