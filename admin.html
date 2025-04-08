@@ -1,0 +1,67 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Duyệt bài | Admin</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <style>
+    body { max-width: 700px; margin: auto; font-family: Arial, sans-serif; padding: 20px; }
+    .post { background: #fff; padding: 16px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    button { padding: 6px 12px; margin-top: 10px; background: #009688; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #00796b; }
+  </style>
+</head>
+<body>
+  <h2>🛡 Danh sách bài chưa được duyệt</h2>
+  <div id="postsContainer"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDbKvZO0GhX-e43jJ9xhUuW7jlSqxyIHQo",
+      authDomain: "hoinhamo1.firebaseapp.com",
+      projectId: "hoinhamo1",
+      storageBucket: "hoinhamo1.appspot.com",
+      messagingSenderId: "39644722511",
+      appId: "1:39644722511:web:4fe4296d138205e3d0413a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const container = document.getElementById("postsContainer");
+
+    db.collection("posts")
+      .where("approved", "==", false)
+      .orderBy("createdAt", "desc")
+      .get()
+      .then(snapshot => {
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "post";
+          div.innerHTML = `
+            <h3>${data.title}</h3>
+            <p>${data.content}</p>
+            ${data.imageUrl ? `<img src="${data.imageUrl}" style="max-width:100%; border-radius:6px;">` : ""}
+            <p><i>👤 ${data.author} | 🕓 ${data.createdAt?.toDate().toLocaleString()}</i></p>
+            <button onclick="approvePost('${doc.id}', this)">✅ Duyệt bài</button>
+          `;
+          container.appendChild(div);
+        });
+      });
+
+    function approvePost(postId, button) {
+      db.collection("posts").doc(postId).update({
+        approved: true
+      }).then(() => {
+        button.parentElement.remove();
+        alert("✅ Bài đã được duyệt!");
+      }).catch(error => {
+        alert("❌ Lỗi khi duyệt bài: " + error);
+      });
+    }
+  </script>
+</body>
+</html>

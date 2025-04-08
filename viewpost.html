@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Bài viết | Hội Nhà Mơ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <style>
+    .post {
+      border: 1px solid #ccc;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      background: #fff;
+    }
+    .post img {
+      max-width: 100%;
+      margin-top: 10px;
+      border-radius: 6px;
+    }
+    body {
+      max-width: 700px;
+      margin: auto;
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2 class="w3-center">📚 Bài viết từ cộng đồng Hội Nhà Mơ</h2>
+  <div id="postsContainer"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDbKvZO0GhX-e43jJ9xhUuW7jlSqxyIHQo",
+      authDomain: "hoinhamo1.firebaseapp.com",
+      projectId: "hoinhamo1",
+      storageBucket: "hoinhamo1.appspot.com",
+      messagingSenderId: "39644722511",
+      appId: "1:39644722511:web:4fe4296d138205e3d0413a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const container = document.getElementById("postsContainer");
+
+    db.collection("posts")
+      .where("approved", "==", true)
+      .orderBy("createdAt", "desc")
+      .get()
+      .then(snapshot => {
+        if (snapshot.empty) {
+          container.innerHTML = "<p class='w3-center'>Chưa có bài viết nào được duyệt.</p>";
+        } else {
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const postDiv = document.createElement("div");
+            postDiv.className = "post";
+            postDiv.innerHTML = `
+              <h3>${data.title}</h3>
+              <p>${data.content}</p>
+              ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Ảnh bài viết">` : ""}
+              <p><i>Đăng bởi ${data.author} - ${data.createdAt?.toDate().toLocaleString() || ""}</i></p>
+            `;
+            container.appendChild(postDiv);
+          });
+        }
+      })
+      .catch(error => {
+        console.error("Lỗi khi tải bài viết:", error);
+        container.innerHTML = "<p class='w3-center'>Lỗi khi tải bài viết.</p>";
+      });
+  </script>
+
+</body>
+</html>
