@@ -13,72 +13,78 @@
 <script async defer crossorigin="anonymous" 
   src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"></script>
   <script>
-    // Firebase config mới (thay bằng config thật của bạn)
-    const firebaseConfig = {
-      apiKey: "AIzaSyDbKvZO0GhX-e43jJ9xhUuW7jlSqxyIHQo",
-      authDomain: "hoinhamo1.firebaseapp.com",
-      projectId: "hoinhamo1",
-      storageBucket: "hoinhamo1.firebasestorage.app",
-      messagingSenderId: "39644722511",
-      appId: "1:39644722511:web:4fe4296d138205e3d0413a",
-      measurementId: "G-47QL2JXV49"
-    };
-    
-    // Khởi tạo Firebase với config mới
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    
-    // Đăng bài viết
-    document.getElementById("postForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-    
-      const title = document.getElementById("title").value.trim();
-      const content = document.getElementById("content").value.trim();
-    
-      if (title && content) {
-        try {
-          await db.collection("posts").add({
-            title,
-            content,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          alert("✅ Bài viết đã được đăng!");
-          document.getElementById("postForm").reset();
-          loadPosts();
-        } catch (error) {
-          console.error("❌ Lỗi khi đăng bài:", error);
-          alert("Có lỗi xảy ra khi đăng bài.");
-        }
-      } else {
-        alert("⛔ Vui lòng điền đầy đủ tiêu đề và nội dung.");
+    document.addEventListener("DOMContentLoaded", function () {
+      // Firebase config mới (thay bằng config thật của bạn)
+      const firebaseConfig = {
+        apiKey: "AIzaSyDbKvZO0GhX-e43jJ9xhUuW7jlSqxyIHQo",
+        authDomain: "hoinhamo1.firebaseapp.com",
+        projectId: "hoinhamo1",
+        storageBucket: "hoinhamo1.firebasestorage.app",
+        messagingSenderId: "39644722511",
+        appId: "1:39644722511:web:4fe4296d138205e3d0413a",
+        measurementId: "G-47QL2JXV49"
+      };
+  
+      // Khởi tạo Firebase
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+  
+      // Đăng bài viết
+      const form = document.getElementById("postForm");
+      if (form) {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+  
+          const title = document.getElementById("title").value.trim();
+          const content = document.getElementById("content").value.trim();
+  
+          if (title && content) {
+            try {
+              await db.collection("posts").add({
+                title,
+                content,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+              alert("✅ Bài viết đã được đăng!");
+              form.reset();
+              loadPosts();
+            } catch (error) {
+              console.error("❌ Lỗi khi đăng bài:", error);
+              alert("Có lỗi xảy ra khi đăng bài.");
+            }
+          } else {
+            alert("⛔ Vui lòng điền đầy đủ tiêu đề và nội dung.");
+          }
+        });
       }
+  
+      // Hiển thị bài viết
+      async function loadPosts() {
+        const postsDiv = document.getElementById("posts");
+        if (!postsDiv) return;
+        postsDiv.innerHTML = "";
+        const snapshot = await db.collection("posts").orderBy("createdAt", "desc").get();
+        snapshot.forEach(doc => {
+          const post = doc.data();
+          postsDiv.innerHTML += `
+            <h2>${post.title}</h2>
+            <p>${post.content}</p>
+            <hr>
+          `;
+        });
+      }
+  
+      loadPosts();
     });
-    
-    // Hiển thị bài viết
-    async function loadPosts() {
-      const postsDiv = document.getElementById("posts");
-      postsDiv.innerHTML = "";
-      const snapshot = await db.collection("posts").orderBy("createdAt", "desc").get();
-      snapshot.forEach(doc => {
-        const post = doc.data();
-        postsDiv.innerHTML += `
-          <h2>${post.title}</h2>
-          <p>${post.content}</p>
-          <hr>
-        `;
-      });
-    }
-    
-    // Gọi khi tải trang
-    loadPosts();
-    
-    window.fbAsyncInit = function() {
+  
+    // Facebook SDK init
+    window.fbAsyncInit = function () {
       FB.init({
         xfbml: true,
         version: 'v18.0'
       });
     };
-    </script>
+  </script>
 <style>
 html, body {
   overflow-x: hidden;
