@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đăng bài | Hội Nhà Mơ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #009688;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #00796b;
+    }
+    #logoutBtn {
+      background-color: #f44336;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Đăng bài viết</h2>
+
+  <div id="userInfo" class="w3-center w3-padding"></div>
+
+  <div id="loginSection" class="w3-center">
+    <button onclick="loginWithGoogle()">Đăng nhập bằng Google</button>
+  </div>
+
+  <form id="postForm" style="display:none;">
+    <input type="text" id="title" placeholder="Tiêu đề bài viết" required>
+    <textarea id="content" placeholder="Nội dung bài viết" required></textarea>
+    <button type="submit">Đăng bài</button>
+    <button type="button" id="logoutBtn">Đăng xuất</button>
+  </form>
+</div>
+
+<script>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDbKvZO0GhX-e43jJ9xhUuW7jlSqxyIHQo",
+    authDomain: "hoinhamo1.firebaseapp.com",
+    projectId: "hoinhamo1",
+    storageBucket: "hoinhamo1.appspot.com",
+    messagingSenderId: "39644722511",
+    appId: "1:39644722511:web:4fe4296d138205e3d0413a",
+    measurementId: "G-47QL2JXV49"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // Đăng nhập bằng Google
+  function loginWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+      .then(result => {
+        console.log("Đã đăng nhập:", result.user.displayName);
+      })
+      .catch(error => {
+        console.error("Lỗi đăng nhập:", error);
+      });
+  }
+
+  // Theo dõi trạng thái đăng nhập
+  auth.onAuthStateChanged(user => {
+    const postForm = document.getElementById("postForm");
+    const loginSection = document.getElementById("loginSection");
+    const userInfo = document.getElementById("userInfo");
+
+    if (user) {
+      postForm.style.display = "block";
+      loginSection.style.display = "none";
+      userInfo.innerHTML = `👤 Xin chào, <strong>${user.displayName}</strong>`;
+    } else {
+      postForm.style.display = "none";
+      loginSection.style.display = "block";
+      userInfo.innerHTML = "";
+    }
+  });
+
+  // Gửi bài viết
+  const form = document.getElementById("postForm");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = document.getElementById("title").value.trim();
+    const content = document.getElementById("content").value.trim();
+    const user = auth.currentUser;
+
+    if (title && content && user) {
+      try {
+        await db.collection("posts").add({
+          title,
+          content,
+          author: user.displayName,
+          email: user.email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert("✅ Bài viết đã được đăng!");
+        form.reset();
+      } catch (error) {
+        console.error("❌ Lỗi khi đăng bài:", error);
+        alert("Có lỗi xảy ra khi đăng bài.");
+      }
+    }
+  });
+
+  // Đăng xuất
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    auth.signOut();
+  });
+</script>
+
+</body>
+</html>
