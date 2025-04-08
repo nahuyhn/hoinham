@@ -2,55 +2,50 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Quản trị Bài viết | Hội Nhà Mơ</title>
+  <title>Trang Admin | Hội Nhà Mơ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
-      padding: 20px;
       max-width: 800px;
       margin: auto;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
     }
     .post {
       background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
       padding: 16px;
-      border-radius: 10px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     .post img {
       max-width: 100%;
+      margin-top: 10px;
       border-radius: 6px;
-      margin-top: 10px;
     }
-    .post button {
+    button {
+      margin-top: 10px;
       margin-right: 10px;
-      margin-top: 10px;
-    }
-    .w3-button.logout {
-      background: #f44336;
-      color: white;
-      float: right;
     }
   </style>
 </head>
 <body>
-  <h2>🔒 Quản trị bài viết</h2>
-  <div id="userInfo" class="w3-padding"></div>
-  <div id="loginSection">
-    <button class="w3-button w3-blue" onclick="loginAdmin()">Đăng nhập Admin</button>
-  </div>
-  <div id="adminPanel" style="display:none;">
-    <button class="w3-button logout" onclick="logout()">Đăng xuất</button>
-    <div id="postsContainer"></div>
+
+  <h2 class="w3-center">🔐 Trang Quản Trị Bài Viết</h2>
+  <div id="adminInfo" class="w3-center w3-margin-bottom"></div>
+  <div id="loginSection" class="w3-center">
+    <button onclick="login()">🔑 Đăng nhập bằng Google</button>
   </div>
 
+  <div id="postsContainer" style="display:none;"></div>
+
   <script>
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDbKvZO0GhX-e43jJ9xhUuW7jlSqxyIHQo",
       authDomain: "hoinhamo1.firebaseapp.com",
@@ -60,89 +55,79 @@
       appId: "1:39644722511:web:4fe4296d138205e3d0413a"
     };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
     const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    const allowedEmail = "huynhbinhan.n@gmail.com"; // <-- THAY bằng email admin
+    const adminEmail = "youradmin@gmail.com"; // THAY BẰNG EMAIL ADMIN CỦA BẠN
 
-    function loginAdmin() {
+    function login() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(err => {
-        console.error("Lỗi đăng nhập:", err);
-        alert("Lỗi đăng nhập: " + err.message);
-      });
+      auth.signInWithPopup(provider)
+        .then(result => {
+          console.log("Đã đăng nhập:", result.user.email);
+        })
+        .catch(error => {
+          console.error("Lỗi đăng nhập:", error);
+          alert("Lỗi đăng nhập: " + error.message);
+        });
     }
 
     auth.onAuthStateChanged(user => {
-      const loginSection = document.getElementById("loginSection");
-      const adminPanel = document.getElementById("adminPanel");
-      const userInfo = document.getElementById("userInfo");
-
-      if (user && user.email === allowedEmail) {
-        loginSection.style.display = "none";
-        adminPanel.style.display = "block";
-        userInfo.innerHTML = `Xin chào <strong>${user.displayName}</strong> 👑 (${user.email})`;
+      if (user && user.email === adminEmail) {
+        document.getElementById("adminInfo").innerHTML = `👮 Xin chào Admin: <strong>${user.displayName}</strong>`;
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("postsContainer").style.display = "block";
         loadPosts();
       } else {
-        adminPanel.style.display = "none";
-        loginSection.style.display = "block";
-        userInfo.innerHTML = "";
-        if (user && user.email !== allowedEmail) {
-          alert("Bạn không có quyền truy cập trang admin này.");
-          auth.signOut();
-        }
+        document.getElementById("adminInfo").innerHTML = `<span style="color:red;">Chỉ admin được truy cập trang này!</span>`;
+        document.getElementById("postsContainer").style.display = "none";
       }
     });
 
-    function logout() {
-      auth.signOut();
-    }
-
     function loadPosts() {
-      const container = document.getElementById("postsContainer");
-      container.innerHTML = "Đang tải...";
-
       db.collection("posts").orderBy("createdAt", "desc").get()
         .then(snapshot => {
+          const container = document.getElementById("postsContainer");
           container.innerHTML = "";
           snapshot.forEach(doc => {
-            const data = doc.data();
-            const div = document.createElement("div");
-            div.className = "post";
-            div.innerHTML = `
-              <h3>${data.title}</h3>
-              <p>${data.content}</p>
-              ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Ảnh">` : ""}
-              <p><strong>Tác giả:</strong> ${data.author}</p>
-              <p><strong>Trạng thái:</strong> ${data.approved ? "✅ Đã duyệt" : "❌ Chưa duyệt"}</p>
-              <button onclick="approvePost('${doc.id}')">✅ Duyệt</button>
-              <button onclick="deletePost('${doc.id}')">🗑️ Xoá</button>
+            const post = doc.data();
+            const postDiv = document.createElement("div");
+            postDiv.className = "post";
+            postDiv.innerHTML = `
+              <h3>${post.title}</h3>
+              <p>${post.content}</p>
+              ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Ảnh bài đăng">` : ""}
+              <p><strong>Người đăng:</strong> ${post.author} | <strong>Email:</strong> ${post.email}</p>
+              <p><strong>Trạng thái:</strong> ${post.approved ? "✅ Đã duyệt" : "⏳ Chờ duyệt"}</p>
+              ${!post.approved ? `<button onclick="approvePost('${doc.id}')">✔️ Duyệt bài</button>` : ""}
+              <button onclick="deletePost('${doc.id}')">🗑️ Xoá bài</button>
             `;
-            container.appendChild(div);
+            container.appendChild(postDiv);
           });
         })
         .catch(err => {
-          container.innerHTML = "❌ Lỗi khi tải bài viết: " + err.message;
+          console.error("Lỗi khi tải bài viết:", err);
         });
     }
 
     function approvePost(id) {
-      db.collection("posts").doc(id).update({ approved: true })
-        .then(() => {
-          alert("✅ Đã duyệt bài viết.");
-          loadPosts();
-        });
+      db.collection("posts").doc(id).update({
+        approved: true
+      }).then(() => {
+        alert("✅ Bài viết đã được duyệt.");
+        loadPosts();
+      });
     }
 
     function deletePost(id) {
       if (confirm("Bạn có chắc muốn xoá bài viết này?")) {
-        db.collection("posts").doc(id).delete()
-          .then(() => {
-            alert("🗑️ Đã xoá bài viết.");
-            loadPosts();
-          });
+        db.collection("posts").doc(id).delete().then(() => {
+          alert("🗑️ Đã xoá bài viết.");
+          loadPosts();
+        });
       }
     }
   </script>
+
 </body>
 </html>
