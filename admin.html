@@ -2,47 +2,61 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Trang Admin | Hội Nhà Mơ</title>
+  <title>Quản trị | Hội Nhà Mơ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <style>
-    body {
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-    }
     .post {
-      background: white;
       border: 1px solid #ccc;
+      padding: 12px;
+      margin: 10px 0;
       border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 20px;
+      background: white;
     }
-    .post img {
-      max-width: 100%;
-      margin-top: 10px;
+    .btn {
+      padding: 6px 12px;
+      margin: 5px 4px 0 0;
+      border: none;
       border-radius: 6px;
+      cursor: pointer;
     }
-    button {
-      margin-top: 10px;
-      margin-right: 10px;
-    }
+    .approve { background: #4CAF50; color: white; }
+    .delete { background: #f44336; color: white; }
+    img { max-width: 100%; border-radius: 6px; margin: 6px 0; }
+    input, textarea { width: 100%; margin: 5px 0; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
   </style>
 </head>
-<body>
+<body class="w3-container">
 
-  <h2 class="w3-center">🔐 Trang Quản Trị Bài Viết</h2>
-  <div id="adminInfo" class="w3-center w3-margin-bottom"></div>
-  <div id="loginSection" class="w3-center">
-    <button onclick="login()">🔑 Đăng nhập bằng Google</button>
+  <h2 class="w3-center">Trang quản trị Hội Nhà Mơ</h2>
+
+  <div id="loginSection" class="w3-center w3-margin">
+    <p>🔒 Nhập mật khẩu admin:</p>
+    <input type="password" id="adminPassword" placeholder="Mật khẩu admin...">
+    <button class="btn approve" onclick="checkAdmin()">Đăng nhập</button>
+    <p id="loginMessage" class="w3-text-red"></p>
   </div>
 
-  <div id="postsContainer" style="display:none;"></div>
+  <div id="adminSection" style="display:none;">
+    <h3>Thêm bài viết mới (Admin)</h3>
+    <div class="w3-card w3-padding">
+      <input type="text" id="titleInput" placeholder="Tiêu đề bài viết">
+      <textarea id="contentInput" rows="3" placeholder="Nội dung bài viết"></textarea>
+      <input type="text" id="authorInput" placeholder="Tên tác giả">
+      <input type="text" id="emailInput" placeholder="Email tác giả">
+      <input type="text" id="imageUrlInput" placeholder="Link ảnh (tùy chọn)">
+      <button class="btn approve" onclick="addPost()">➕ Đăng bài</button>
+    </div>
+
+    <h3>Bài viết chưa duyệt</h3>
+    <div id="unapprovedPosts"></div>
+
+    <h3>Bài viết đã duyệt</h3>
+    <div id="approvedPosts"></div>
+  </div>
 
   <script>
     // Firebase config
@@ -55,79 +69,95 @@
       appId: "1:39644722511:web:4fe4296d138205e3d0413a"
     };
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
     const db = firebase.firestore();
 
-    const adminEmail = "huynhbinhan.n@gmail.com"; // THAY BẰNG EMAIL ADMIN CỦA BẠN
+    const ADMIN_PASSWORD = "123";
 
-    function login() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then(result => {
-          console.log("Đã đăng nhập:", result.user.email);
-        })
-        .catch(error => {
-          console.error("Lỗi đăng nhập:", error);
-          alert("Lỗi đăng nhập: " + error.message);
-        });
-    }
-
-    auth.onAuthStateChanged(user => {
-      if (user && user.email === adminEmail) {
-        document.getElementById("adminInfo").innerHTML = `👮 Xin chào Admin: <strong>${user.displayName}</strong>`;
+    function checkAdmin() {
+      const pw = document.getElementById("adminPassword").value;
+      const msg = document.getElementById("loginMessage");
+      if (pw === ADMIN_PASSWORD) {
         document.getElementById("loginSection").style.display = "none";
-        document.getElementById("postsContainer").style.display = "block";
+        document.getElementById("adminSection").style.display = "block";
         loadPosts();
       } else {
-        document.getElementById("adminInfo").innerHTML = `<span style="color:red;">Chỉ admin được truy cập trang này!</span>`;
-        document.getElementById("postsContainer").style.display = "none";
+        msg.textContent = "Sai mật khẩu!";
       }
-    });
+    }
 
     function loadPosts() {
-      db.collection("posts").orderBy("createdAt", "desc").get()
-        .then(snapshot => {
-          const container = document.getElementById("postsContainer");
-          container.innerHTML = "";
-          snapshot.forEach(doc => {
-            const post = doc.data();
-            const postDiv = document.createElement("div");
-            postDiv.className = "post";
-            postDiv.innerHTML = `
-              <h3>${post.title}</h3>
-              <p>${post.content}</p>
-              ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Ảnh bài đăng">` : ""}
-              <p><strong>Người đăng:</strong> ${post.author} | <strong>Email:</strong> ${post.email}</p>
-              <p><strong>Trạng thái:</strong> ${post.approved ? "✅ Đã duyệt" : "⏳ Chờ duyệt"}</p>
-              ${!post.approved ? `<button onclick="approvePost('${doc.id}')">✔️ Duyệt bài</button>` : ""}
-              <button onclick="deletePost('${doc.id}')">🗑️ Xoá bài</button>
-            `;
-            container.appendChild(postDiv);
-          });
-        })
-        .catch(err => {
-          console.error("Lỗi khi tải bài viết:", err);
+      db.collection("posts").get().then(snapshot => {
+        const approvedDiv = document.getElementById("approvedPosts");
+        const unapprovedDiv = document.getElementById("unapprovedPosts");
+        approvedDiv.innerHTML = "";
+        unapprovedDiv.innerHTML = "";
+
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "post";
+          div.innerHTML = `
+            <h4>${data.title}</h4>
+            ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Ảnh">` : ""}
+            <p>${data.content}</p>
+            <p><strong>Tác giả:</strong> ${data.author || "Ẩn danh"} (${data.email || "?"})</p>
+            <p><strong>Duyệt:</strong> ${data.approved ? "✅ Đã duyệt" : "❌ Chưa duyệt"}</p>
+            ${!data.approved ? `<button class="btn approve" onclick="approvePost('${doc.id}')">✅ Duyệt</button>` : ""}
+            <button class="btn delete" onclick="deletePost('${doc.id}')">🗑️ Xóa</button>
+          `;
+
+          if (data.approved) {
+            approvedDiv.appendChild(div);
+          } else {
+            unapprovedDiv.appendChild(div);
+          }
         });
+      });
     }
 
     function approvePost(id) {
-      db.collection("posts").doc(id).update({
-        approved: true
-      }).then(() => {
-        alert("✅ Bài viết đã được duyệt.");
+      db.collection("posts").doc(id).update({ approved: true }).then(() => {
+        alert("Đã duyệt bài viết!");
         loadPosts();
       });
     }
 
     function deletePost(id) {
-      if (confirm("Bạn có chắc muốn xoá bài viết này?")) {
+      if (confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {
         db.collection("posts").doc(id).delete().then(() => {
-          alert("🗑️ Đã xoá bài viết.");
+          alert("Đã xóa bài viết.");
           loadPosts();
         });
       }
     }
-  </script>
 
+    function addPost() {
+      const title = document.getElementById("titleInput").value;
+      const content = document.getElementById("contentInput").value;
+      const author = document.getElementById("authorInput").value;
+      const email = document.getElementById("emailInput").value;
+      const imageUrl = document.getElementById("imageUrlInput").value;
+
+      if (!title || !content) return alert("Tiêu đề và nội dung là bắt buộc!");
+
+      db.collection("posts").add({
+        title,
+        content,
+        author,
+        email,
+        imageUrl,
+        approved: true, // admin post => auto approved
+        createdAt: new Date()
+      }).then(() => {
+        alert("Đã đăng bài mới!");
+        document.getElementById("titleInput").value = "";
+        document.getElementById("contentInput").value = "";
+        document.getElementById("authorInput").value = "";
+        document.getElementById("emailInput").value = "";
+        document.getElementById("imageUrlInput").value = "";
+        loadPosts();
+      });
+    }
+  </script>
 </body>
 </html>
