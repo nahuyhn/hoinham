@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chi tiết bài viết - @hoinhamo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;600&display=swap">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <style>
+    body, html {
+      font-family: "Inconsolata", monospace;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .post-container {
+      width: 100%;
+      max-width: 900px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      margin: 20px;
+      transition: transform 0.3s ease;
+    }
+    .post-container:hover {
+      transform: translateY(-5px);
+    }
+    .post-title {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .post-meta {
+      color: #777;
+      margin-bottom: 15px;
+    }
+    .post-content {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 20px;
+    }
+    .post-stats {
+      color: #777;
+      font-size: 0.9em;
+      margin-bottom: 20px;
+    }
+    .post-stats button {
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    .post-stats button:hover {
+      background-color: #0d47a1;
+    }
+    textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      resize: vertical;
+    }
+    #commentList {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    #commentList p {
+      background-color: #f4f4f4;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    #commentList p b {
+      color: #1e88e5;
+    }
+  </style>
+</head>
+<body>
+
+<div class="post-container">
+  <div class="post-title" id="title">Đang tải...</div>
+  <div class="post-meta" id="author">Tác giả: </div>
+  <div class="post-content" id="content">...</div>
+  <div class="post-stats">
+    <span id="views">👁 0 lượt xem</span> | 
+    <button id="likeBtn">👍 Thích (<span id="likeCount">0</span>)</button>
+  </div>
+
+  <hr>
+  <h4>Bình luận</h4>
+  <div id="commentList"></div>
+  <textarea id="commentInput" placeholder="Viết bình luận..."></textarea>
+  <button id="submitComment">Gửi bình luận</button>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDbKvZO0GhX-e43jJ9xhUuW7jlSqxyIHQo",
+    authDomain: "hoinhamo1.firebaseapp.com",
+    projectId: "hoinhamo1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+
+  const postId = new URLSearchParams(location.search).get("id");
+  const postRef = db.collection("posts").doc(postId);
+  let currentUser = null;
+
+  // Tăng lượt xem mỗi khi truy cập
+  postRef.update({ views: firebase.firestore.FieldValue.increment(1) });
+
+  // Tải dữ liệu bài viết
+  postRef.get().then(doc => {
+    if (!doc.exists) return alert("Không tìm thấy bài viết!");
+    const post = doc.data();
+    document.getElementById("title").innerText = post.title;
+    document.getElementById("author").innerText = "Tác giả: " + (post.author || "Ẩn danh");
+    document.getElementById("content").innerText = post.content || "";
+    document.getElementById("views").innerText = `👁 ${post.views + 1} lượt xem`;
+    document.getElementById("likeCount").innerText = post.likes || 0;
+  });
+
+  // Xử lý like
+  document.getElementById("likeBtn").onclick = () => {
+    postRef.update({ likes: firebase.firestore.FieldValue.increment(1) })
+      .then(() => {
+        const countSpan = document.getElementById("likeCount");
+        countSpan.innerText = parseInt(countSpan.innerText) + 1;
+      });
+  };
+
+  // Hiển thị bình luận
+  function loadComments() {
+    postRef.collection("comments")
+      .orderBy("createdAt", "desc")
+      .get()
+      .then(snapshot => {
+        const list = document.getElementById("commentList");
+        list.innerHTML = "";
+        snapshot.forEach(doc => {
+          const c = doc.data();
+          list.innerHTML += `<p><b>${c.author || "Ẩn danh"}:</b> ${c.text}</p>`;
+        });
+      });
+  }
+
+  loadComments();
+
+  // Gửi bình luận
+  document.getElementById("submitComment").onclick = () => {
+    const text = document.getElementById("commentInput").value;
+    if (!text) return;
+
+    const comment = {
+      text,
+      author: currentUser?.displayName || "Ẩn danh",
+      createdAt: firebase.firestore.Timestamp.now()
+    };
+
+    postRef.collection("comments").add(comment).then(() => {
+      postRef.update({ comments: firebase.firestore.FieldValue.increment(1) });
+      document.getElementById("commentInput").value = "";
+      loadComments();
+    });
+  };
+
+  // Lấy thông tin người dùng (nếu đã đăng nhập)
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      currentUser = user;
+    }
+  });
+</script>
+
+</body>
+</html>

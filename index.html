@@ -1,186 +1,248 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>@hoinhamo</title>
-<!-- Firebase App (the core Firebase SDK) -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<!-- Add Firestore -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
-<script async defer crossorigin="anonymous" 
-  src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0">
-    // Facebook SDK init
-    window.fbAsyncInit = function () {
-      FB.init({
-        xfbml: true,
-        version: 'v18.0'
-      });
-    };
-  </script>
-<style>
-html, body {
-  overflow-x: hidden;
-}
+  <title>@hoinhamo - Nổi Bật</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
-img {
-  max-width: 100%;
-  height: auto;
+  <style>
+    body, html {
+      height: 100%;
+      font-family: "Inconsolata", sans-serif;
+    }
+    .post-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-left: 4px solid #100f0f;
+      transition: transform 0.2s ease-in-out;
+      padding: 16px;
+      margin-bottom: 12px;
+      background-color: #ffffff;
+      border-radius: 6px;
+      font-family: "Inconsolata", monospace;
+    }
+    .post-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+    .post-title {
+      font-weight: bold;
+      font-size: 1.15em;
+      color: #040303;
+      margin-bottom: 4px;
+    }
+    .post-meta {
+      color: #080808;
+      font-size: 0.9em;
+    }
+    .post-stats {
+      font-size: 0.85em;
+      color: #121212;
+      margin-top: 8px;
+    }
+    .bgimg {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
 }
-
-.w3-row {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-.w3-container {
-  overflow-x: hidden;
-}
-body, html {
-  height: 100%;
-  font-family: "Inconsolata", sans-serif;
-}
-
-.bgimg {
-  background-position: center;
+.bg-layer {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background-size: cover;
-  background-image: url("image-web/header2.jpg");
-  min-height: 75%;
+  background-position: center;
+  z-index: -1;
+  opacity: 1;
+  transition: opacity 1s ease-in-out;
+}
+/* Style for Dashboard buttons */
+.w3-button {
+  margin-bottom: 10px;
+  font-size: 1em;
+  padding: 10px 5px;
 }
 
-.menu {
-  display: none;
+.w3-button:hover {
+  background-color: #02070e; /* Darker shade of blue */
 }
-.fb-post, .fb-video, iframe {
-  max-width: 100% !important;
-  width: 100% !important;
-  height: auto !important;
-}
-</style>
+
+
+  </style>
+
 </head>
 <body>
-
 <!-- Links (sit on top) -->
 <div class="w3-top">
-  <div class="w3-row w3-padding w3-black">
-    <div class="w3-col s3">
-      <a href="index.html" class="w3-button w3-block w3-black">NHÀ</a>
-    </div>
-    <div class="w3-col s3">
-      <a href="about.html" class="w3-button w3-block w3-black">VỀ CHÚNG MÌNH</a>
-    </div>
-    <div class="w3-col s3">
-      <a href="contact.html" class="w3-button w3-block w3-black">LIÊN KẾT</a>
-    </div>
-    <div class="w3-col s3">
-      <a href="motime.html" class="w3-button w3-block w3-black">!ĐẶC BIỆT!</a>
+    <div class="w3-row w3-padding w3-black">
+      <div class="w3-col s3">
+        <a href="index.html" class="w3-button w3-block w3-black">NHÀ</a>
+      </div>
+      <div class="w3-col s3">
+        <a href="posts.html" class="w3-button w3-block w3-black">BÀI ĐĂNG</a>
+      </div>
+      <div class="w3-col s3">
+        <a href="test.html" class="w3-button w3-block w3-black">VỀ CHÚNG MÌNH</a>
+      </div>
+      <div class="w3-col s3">
+        <a href="dangnhap.html" class="w3-button w3-block w3-black">ĐĂNG NHẬP</a>
+      </div>
     </div>
   </div>
-</div>
-
-<!-- Header with image -->
-<header class="bgimg w3-display-container" id="home">
-  <div class="w3-display-bottomleft w3-center w3-padding-large w3-hide-small">
-    <span class="w3-tag">Chia sẽ nghệ thuật của riêng bạn.</span>
-  </div>
-  <div class="w3-display-middle w3-center">
-    <span class="w3-text-white" style="font-size:90px">the<br>Mo</span>
-  </div>
-  <div class="w3-display-bottomright w3-center w3-padding-large">
-    <span class="w3-text-white">Nhon Trach, Dong Nai.</span>
-  </div>
-</header>
-
-<!-- Add a background color and large text to the whole page -->
-<div class="w3-sand w3-large">
-
-<!-- About Container -->
-<div class="w3-container" id="about">
-  <div class="w3-content" style="max-width:700px">
-    <h5 class="w3-center w3-padding-64"><span class="w3-tag w3-wide">CHUYỆN VỀ MƠ</span></h5>
-    <p>Một nhóm nhỏ những bạn học sinh luôn mang trong mình những giấc mơ về những khung cảnh đẹp. Họ không chỉ mơ về những cánh đồng hoa bạt ngàn, những bầu trời rực rỡ hoàng hôn hay những con phố lung linh ánh đèn, mà còn khao khát một ngày nào đó có thể chạm tay vào những khoảnh khắc ấy. Mỗi lần ngồi bên nhau, họ say sưa kể về những nơi xa xôi mà họ muốn đặt chân đến, những bức tranh thiên nhiên mà họ muốn lưu giữ trong tâm hồn. Đối với họ, thế giới không chỉ gói gọn trong những trang sách, mà còn mở ra trong những giấc mơ đầy màu sắc, nơi cái đẹp hiện hữu ở khắp mọi nơi.</p>
-    <p>Mặc dù ít ai thấu hiểu.</p>
-    <div class="w3-panel w3-leftbar w3-light-grey">
-      <p><i>"Cái nhìn trong đôi mắt, cái đẹp trong suy nghĩ."</i></p>
-      <p>@hoinhamo</p>
-    </div>
-    <img src="image-web/header3.jpg" style="width:100%;max-width:1000px" class="w3-margin-top">
-    <p><strong>By:</strong>gsh.hba.thptnguyenbinhkhiem.221124</p>
-    <p><strong>Address:</strong>Somewhere</p>
-  </div>
-</div>
-
-<!-- Menu Container -->
-<div class="w3-container" id="menu">
-  <div class="w3-content" style="max-width:700px">
- 
-    <h5 class="w3-center w3-padding-48"><span class="w3-tag w3-wide">BÀI ĐĂNG</span></h5>
   
-    <div class="w3-row w3-center w3-card w3-padding">
-      <a href="javascript:void(0)" onclick="openMenu(event, 'Eat');" id="myLink">
-        <div class="w3-col s6 tablink">Mới Nhất</div>
-      </a>
-      <a href="javascript:void(0)" onclick="openMenu(event, 'Drinks');">
-        <div class="w3-col s6 tablink">Nổi Bật</div>
-      </a>
+  <!-- Header with image -->
+  <header class="bgimg w3-display-container" id="home">
+    <div class="bg-layer"></div>
+    <div class="w3-display-bottomleft w3-center w3-padding-large w3-hide-small">
+      <span class="w3-tag">Chia sẽ nghệ thuật của riêng bạn.</span>
     </div>
-
-    <div id="Eat" class="w3-container menu w3-padding-48 w3-card">
-      <a href="https://www.facebook.com/reel/380779625129016" style="text-decoration: none;">
-        <h5>Gương, nến thơm và sách</h5>
-        <p class="w3-text-grey">Video - Âm Nhạc</p><br>
-      </a>
-      <div class="fb-post" data-href="https://www.facebook.com/reel/380779625129016" data-width="auto"></div>
+    <div class="w3-display-middle w3-center">
+      <span class="w3-text-white" style="font-size:90px">the<br>Mo</span>
     </div>
-
-    <div id="Drinks" class="w3-container menu w3-padding-48 w3-card">
-      <a href="https://www.facebook.com/photo?fbid=122112201866642727&set=pcb.122112201992642727" style="text-decoration: none;">
-        <h5>Để tìm</h5>
-        <p class="w3-text-grey">Hình Ảnh</p><br>
-      </a>
-      <div class="fb-post" data-href="https://www.facebook.com/photo?fbid=122112201866642727&set=pcb.122112201992642727" data-width="auto"></div>
+    <div class="w3-display-bottomright w3-center w3-padding-large">
+      <span class="w3-text-white">Nhon Trach, Dong Nai.</span>
     </div>
-</div>
+  </header>
+<div class="w3-content w3-padding" style="max-width:900px">
 
-<!-- Contact/Area Container -->
-<div class="w3-container" id="where" style="padding-bottom:32px;">
-  <div class="w3-content" style="max-width:700px">
-    <h5 class="w3-center w3-padding-48"><span class="w3-tag w3-wide">TÌM TỤI MÌNH Ở ĐÂU!?</span></h5>
-    <p>Chào Bạn</p>
-    <p><span class="w3-tag">Liên hệ</span> để tham gia cùng.</p>
-    <p><strong>Nhắn cho Mơ nhé</strong></p>
-    <p>Gmail : hoinhamo.nhontrach@gmail.com</p>
-    <p><a href="www.facebook.com/hoinhamo" style="text-decoration: none;" >Facebook : Hội Nhà Mơ</a></p>
-    
+  <!-- Dashboard Section -->
+<div class="w3-container w3-margin-top">
+  <h2 class="w3-text-blue "><b></b></h2>
+  <div class="w3-row">
+    <div class="w3-col s3">
+      <a href="posts.html" class="w3-button w3-block w3-black">BÀI ĐĂNG</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="policy.html" class="w3-button w3-block w3-black">QUY ĐỊNH(none)</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="noti.html" class="w3-button w3-block w3-black">THÔNG BÁO</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="motime.html" class="w3-button w3-block w3-black">BXH(None)</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="account.html" class="w3-button w3-block w3-black">Tài Khoản(None)</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="contact.html" class="w3-button w3-block w3-black">LIÊN HỆ</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="about.html" class="w3-button w3-block w3-black">GIỚI THIỆU</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="www.facebook.com/hoinhamo" class="w3-button w3-block w3-black">FACEBOOK</a>
+    </div>
   </div>
 </div>
 
-<!-- End page content -->
+  <!-- Bài đăng mới nhất -->
+  <div class="w3-container w3-margin-top">
+    <h2 class="w3-text-indigo w3-text-black" style="font-family: Inconsolata"><b>Bài đăng mới nhất</b></h2>
+    <div id="latestPosts" class="w3-section"></div>
+  </div>
 </div>
-
-<!-- Footer -->
-<footer class="w3-center w3-light-grey w3-padding-48 w3-large">
-  <p>Template by w3.css and remake by @hoinhamo</a></p>
-</footer>
-
+</div>
 <script>
-// Tabbed Menu
-function openMenu(evt, menuName) {
-  var i, x, tablinks;
-  x = document.getElementsByClassName("menu");
-  for (i = 0; i < x.length; i++) {
-    x[i].style.display = "none";
+  const firebaseConfig = {
+    apiKey: "AIzaSyDbKvZO0GhX-e43jJ9xhUuW7jlSqxyIHQo",
+    authDomain: "hoinhamo1.firebaseapp.com",
+    projectId: "hoinhamo1",
+    storageBucket: "hoinhamo1.appspot.com",
+    messagingSenderId: "39644722511",
+    appId: "1:39644722511:web:4fe4296d138205e3d0413a",
+    measurementId: "G-47QL2JXV49"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  function createPostCard(post, showStats = false, id = "") {
+    const time = post.createdAt?.toDate().toLocaleString() || "Không rõ thời gian";
+    const views = post.views || 0;
+    const likes = post.likes || 0;
+    const comments = post.comments || 0;
+
+    return `
+      <div class="w3-col s12">
+        <a href="post.html?id=${id}" style="text-decoration: none">
+          <div class="w3-card w3-white post-card">
+            <div>
+              <div class="post-title">${post.title}</div>
+              <div class="post-meta">👤 ${post.author || "Ẩn danh"} - 🕒 ${time}</div>
+              ${showStats ? `<div class="post-stats">👁 ${views} lượt xem | 👍 ${likes} thích | 💬 ${comments} bình luận</div>` : ""}
+            </div>
+          </div>
+        </a>
+      </div>
+    `;
   }
-  tablinks = document.getElementsByClassName("tablink");
-  for (i = 0; i < x.length; i++) {
-    tablinks[i].className = tablinks[i].className.replace(" w3-dark-grey", "");
-  }
-  document.getElementById(menuName).style.display = "block";
-  evt.currentTarget.firstElementChild.className += " w3-dark-grey";
-}
-document.getElementById("myLink").click();
+
+  db.collection("posts")
+    .orderBy("views", "desc")
+    .orderBy("likes", "desc")
+    .orderBy("comments", "desc")
+    .limit(3)
+    .get()
+    .then(snapshot => {
+      const container = document.getElementById("hotPosts");
+      if (snapshot.empty) {
+        container.innerHTML = "<p>Không có bài nổi bật.</p>";
+        return;
+      }
+      let html = "";
+      snapshot.forEach(doc => {
+        html += createPostCard(doc.data(), true, doc.id);
+      });
+      container.innerHTML = html;
+    });
+
+  db.collection("posts")
+    .orderBy("createdAt", "desc")
+    .limit(6)
+    .get()
+    .then(snapshot => {
+      const container = document.getElementById("latestPosts");
+      if (snapshot.empty) {
+        container.innerHTML = "<p>Chưa có bài đăng.</p>";
+        return;
+      }
+      let html = "";
+      snapshot.forEach(doc => {
+        html += createPostCard(doc.data(), false, doc.id);
+      });
+      container.innerHTML = html;
+    });
 </script>
+<script>
+    const images = [
+  'image-web/header1.jpg',
+  'image-web/header2.jpg',
+  'image-web/header3.jpg',
+  'image-web/DSCF9127.JPG',
+  'image-web/DSCF9129.JPG',
+  'image-web/IMG_3404.JPG'
+];
+
+let currentImageIndex = 0;
+
+window.addEventListener("load", () => {
+  const bgLayer = document.querySelector(".bg-layer");
+  bgLayer.style.backgroundImage = `url('${images[currentImageIndex]}')`;
+
+  setInterval(() => {
+    bgLayer.style.opacity = 0;
+    setTimeout(() => {
+      currentImageIndex = (currentImageIndex + 1) % images.length;
+      bgLayer.style.backgroundImage = `url('${images[currentImageIndex]}')`;
+      bgLayer.style.opacity = 1;
+    }, 1000); // Khớp với CSS transition
+  }, 5000);
+});
+  </script>
+  
 </body>
 </html>
