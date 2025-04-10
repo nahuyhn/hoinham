@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Bài viết | Hội Nhà Mơ</title>
+  <title>Tất cả bài viết | Hội Nhà Mơ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -14,6 +14,7 @@
       border-radius: 8px;
       margin-bottom: 20px;
       background: #fff;
+      cursor: pointer;
     }
     .post img {
       max-width: 100%;
@@ -27,12 +28,19 @@
       background-color: #f2f2f2;
       padding: 20px;
     }
+    .likes {
+      color: #ff6b6b;
+    }
+    .comments-count {
+      color: #777;
+    }
   </style>
 </head>
 <body>
 
   <h2 class="w3-center">📚 Bài viết từ cộng đồng Hội Nhà Mơ</h2>
   <div id="postsContainer"></div>
+  <button id="loadMoreBtn" class="w3-button w3-green">Tải thêm bài viết</button>
 
   <script>
     const firebaseConfig = {
@@ -46,34 +54,60 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const container = document.getElementById("postsContainer");
+    let lastVisible = null;
+    const pageSize = 5; // Số lượng bài viết mỗi trang
 
-    db.collection("posts")
-      .where("approved", "==", true)
-      .orderBy("createdAt", "desc")
-      .get()
-      .then(snapshot => {
+    const container = document.getElementById("postsContainer");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+    // Hàm để tải bài viết từ Firestore
+    function loadPosts() {
+      let query = db.collection("posts")
+        .where("approved", "==", true)
+        .orderBy("createdAt", "desc")
+        .limit(pageSize);
+
+      if (lastVisible) {
+        query = query.startAfter(lastVisible);
+      }
+
+      query.get().then(snapshot => {
         if (snapshot.empty) {
+          loadMoreBtn.style.display = 'none';
           container.innerHTML = "<p class='w3-center'>Chưa có bài viết nào được duyệt.</p>";
         } else {
           snapshot.forEach(doc => {
             const data = doc.data();
             const postDiv = document.createElement("div");
             postDiv.className = "post";
-            postDiv.innerHTML = `
-              <h3>${data.title}</h3>
+            
+            // Thêm liên kết đến trang post.html với ID bài viết
+            postDiv.innerHTML = `  
+              <h3><a href="post.html?id=${doc.id}">${data.title}</a></h3>
               <p>${data.content}</p>
               ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Ảnh bài viết">` : ""}
               <p><i>Đăng bởi ${data.author} - ${data.createdAt?.toDate().toLocaleString() || ""}</i></p>
+              <p><span class="likes">❤️ Lượt thích: ${data.likes || 0}</span></p>
+              <p class="comments-count">💬 Lượt bình luận: ${data.commentsCount || 0}</p>
             `;
             container.appendChild(postDiv);
           });
+
+          // Lưu trang cuối cùng
+          lastVisible = snapshot.docs[snapshot.docs.length - 1];
         }
-      })
-      .catch(error => {
+      }).catch(error => {
         console.error("Lỗi khi tải bài viết:", error);
         container.innerHTML = "<p class='w3-center'>Lỗi khi tải bài viết.</p>";
       });
+    }
+
+    // Tải bài viết khi load trang
+    loadPosts();
+
+    // Tải thêm bài viết khi click nút
+    loadMoreBtn.addEventListener('click', loadPosts);
+
   </script>
 
 </body>
