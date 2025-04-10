@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+"<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
@@ -8,6 +8,14 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <style>
+    body {
+      max-width: 700px;
+      margin: auto;
+      font-family: "Inconsolata", sans-serif;
+      background-color: #f2f2f2;
+      padding: 20px;
+      padding-top: 56px; /* Giữ khoảng cho thanh menu */
+    }
     .post {
       border: 1px solid #ccc;
       padding: 16px;
@@ -15,18 +23,12 @@
       margin-bottom: 20px;
       background: #fff;
       cursor: pointer;
+      font-family: "Inconsolata", sans-serif;
     }
     .post img {
       max-width: 100%;
       margin-top: 10px;
       border-radius: 6px;
-    }
-    body {
-      max-width: 700px;
-      margin: auto;
-      font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
-      padding: 20px;
     }
     .likes {
       color: #ff6b6b;
@@ -34,13 +36,70 @@
     .comments-count {
       color: #777;
     }
+    /* Thanh điều hướng */
+    .nav-bar {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: #000;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 10;
+      justify-content: center !important;
+      left: 0 !important;
+    }
+    .nav-bar a {
+      color: white;
+      padding: 10px 16px;
+      text-decoration: none;
+      text-align: center;
+      flex: 1 1 auto;
+      min-width: 100px;
+    }
+    .nav-bar a:hover {
+      background-color: #333;
+    }
+    /* Phân trang */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .pagination button {
+      padding: 8px 16px;
+      margin: 0 5px;
+      cursor: pointer;
+      background-color: #000;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    .pagination button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
 
-  <h2 class="w3-center">📚 Bài viết từ cộng đồng Hội Nhà Mơ</h2>
-  <div id="postsContainer"></div>
-  <button id="loadMoreBtn" class="w3-button w3-green">Tải thêm bài viết</button>
+  <!-- Thanh menu -->
+  <div class="nav-bar">
+    <a href="index.html">NHÀ</a>
+    <a href="viewpost.html">BÀI ĐĂNG</a>
+    <a href="test.html">VỀ CHÚNG MÌNH</a>
+    <a href="dangnhap.html">ĐĂNG NHẬP</a>
+  </div>
+
+  <div class="w3-content w3-padding" style="max-width:900px">
+    <h2 class="w3-center">Bài viết từ cộng đồng Hội Nhà Mơ</h2>
+    <div id="postsContainer"></div>
+    <!-- Phân trang -->
+    <div class="pagination">
+      <button id="prevBtn" onclick="changePage('prev')" disabled>Trang trước</button>
+      <span id="pageInfo" style="margin: 0 10px; line-height: 36px;">Trang 1</span>
+      <button id="nextBtn" onclick="changePage('next')">Trang sau</button>
+    </div>
+  </div>
 
   <script>
     const firebaseConfig = {
@@ -53,61 +112,87 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-
-    let lastVisible = null;
-    const pageSize = 5; // Số lượng bài viết mỗi trang
-
+  
+    let currentPage = 1;
+    const pageSize = 5;
     const container = document.getElementById("postsContainer");
-    const loadMoreBtn = document.getElementById("loadMoreBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const pageInfo = document.getElementById("pageInfo");
+  
+    // Lưu trữ các mốc đầu tiên và cuối cùng của mỗi trang
+    let firstVisibles = [null]; // null cho trang đầu tiên
+    let lastVisibles = []; // Lưu trữ tài liệu cuối cùng của mỗi trang
+  
+    function loadPosts(direction = 'next') {
+  let query = db.collection("posts")
+    .where("approved", "==", true)
+    .orderBy("createdAt", "desc")
+    .limit(pageSize);
 
-    // Hàm để tải bài viết từ Firestore
-    function loadPosts() {
-      let query = db.collection("posts")
-        .where("approved", "==", true)
-        .orderBy("createdAt", "desc")
-        .limit(pageSize);
+  // Nếu không phải trang đầu tiên và đang tải trang tiếp theo
+  if (direction === 'next' && lastVisibles[currentPage - 1]) {
+    query = query.startAfter(lastVisibles[currentPage - 1]);
+  }
+  // Nếu là trang trước, sử dụng offset để bỏ qua các bài viết
+  else if (direction === 'prev' && currentPage > 1) {
+    query = query.startBefore(firstVisibles[currentPage - 1]);
+  }
 
-      if (lastVisible) {
-        query = query.startAfter(lastVisible);
-      }
+  query.get().then(snapshot => {
+    container.innerHTML = ''; // Xóa các bài viết cũ
 
-      query.get().then(snapshot => {
-        if (snapshot.empty) {
-          loadMoreBtn.style.display = 'none';
-          container.innerHTML = "<p class='w3-center'>Chưa có bài viết nào được duyệt.</p>";
-        } else {
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            const postDiv = document.createElement("div");
-            postDiv.className = "post";
-            
-            // Thêm liên kết đến trang post.html với ID bài viết
-            postDiv.innerHTML = `  
-              <h3><a href="post.html?id=${doc.id}">${data.title}</a></h3>
-              <p>${data.content}</p>
-              ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Ảnh bài viết">` : ""}
-              <p><i>Đăng bởi ${data.author} - ${data.createdAt?.toDate().toLocaleString() || ""}</i></p>
-              <p><span class="likes">❤️ Lượt thích: ${data.likes || 0}</span></p>
-              <p class="comments-count">💬 Lượt bình luận: ${data.commentsCount || 0}</p>
-            `;
-            container.appendChild(postDiv);
-          });
-
-          // Lưu trang cuối cùng
-          lastVisible = snapshot.docs[snapshot.docs.length - 1];
-        }
-      }).catch(error => {
-        console.error("Lỗi khi tải bài viết:", error);
-        container.innerHTML = "<p class='w3-center'>Lỗi khi tải bài viết.</p>";
-      });
+    if (snapshot.empty) {
+      container.innerHTML = "<p class='w3-center'>Không còn bài viết nào.</p>";
+      nextBtn.disabled = true;
+      prevBtn.disabled = currentPage === 1;
+      return;
     }
 
-    // Tải bài viết khi load trang
-    loadPosts();
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const postDiv = document.createElement("div");
+      postDiv.className = "post";
+      postDiv.innerHTML = `
+        <h3><a href="post.html?id=${doc.id}">${data.title}</a></h3>
+        <p>${data.content}</p>
+        ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Ảnh bài viết">` : ""}
+        <p><i>Đăng bởi ${data.author} - ${data.createdAt?.toDate().toLocaleString() || ""}</i></p>
+        <p><span class="likes">❤️ Lượt thích: ${data.likes || 0}</span></p>
+        <p class="comments-count">💬 Lượt bình luận: ${data.commentsCount || 0}</p>
+      `;
+      container.appendChild(postDiv);
+    });
 
-    // Tải thêm bài viết khi click nút
-    loadMoreBtn.addEventListener('click', loadPosts);
+    // Lưu trữ mốc đầu tiên và cuối cùng của trang hiện tại
+    if (direction === 'next' && snapshot.docs.length > 0) {
+      firstVisibles[currentPage] = snapshot.docs[0];
+      lastVisibles[currentPage] = snapshot.docs[snapshot.docs.length - 1];
+    }
 
+    // Cập nhật trạng thái nút phân trang
+    prevBtn.disabled = currentPage === 0;
+    nextBtn.disabled = snapshot.size < pageSize;
+
+    // Cập nhật số trang
+    pageInfo.textContent = `Trang ${currentPage}`;
+  }).catch(error => {
+    console.error("Lỗi khi tải bài viết:", error);
+    container.innerHTML = "<p class='w3-center'>Lỗi khi tải bài viết.</p>";
+  });
+}
+
+function changePage(direction) {
+  if (direction === 'next' && !nextBtn.disabled) {
+    currentPage++;
+    loadPosts('next');
+  } else if (direction === 'prev' && currentPage > 1) {
+    currentPage--;
+    loadPosts('prev');
+  }
+}
+  // Tải bài viết lần đầu
+loadPosts();
   </script>
 
 </body>

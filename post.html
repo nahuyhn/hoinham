@@ -91,9 +91,39 @@
     #commentList p b {
       color: #1e88e5;
     }
+        /* Thanh điều hướng */
+        .nav-bar {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: #000;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 10;
+      justify-content: center !important;
+      left: 0 !important;
+    }
+    .nav-bar a {
+      color: white;
+      padding: 10px 16px;
+      text-decoration: none;
+      text-align: center;
+      flex: 1 1 auto;
+      min-width: 100px;
+    }
+    .nav-bar a:hover {
+      background-color: #333;
+    }
   </style>
 </head>
 <body>
+<!-- Thanh menu -->
+<div class="nav-bar">
+  <a href="index.html">NHÀ</a>
+  <a href="viewpost.html">BÀI ĐĂNG</a>
+  <a href="test.html">VỀ CHÚNG MÌNH</a>
+  <a href="dangnhap.html">ĐĂNG NHẬP</a>
+</div>
 
 <div class="post-container">
   <div class="post-title" id="title">Đang tải...</div>
