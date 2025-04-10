@@ -137,6 +137,16 @@
     document.getElementById("content").innerText = post.content || "";
     document.getElementById("views").innerText = `👁 ${post.views + 1} lượt xem`;
     document.getElementById("likeCount").innerText = post.likes || 0;
+    
+    // Hiển thị ảnh từ Cloudinary nếu có
+    if (post.imageUrl) {
+      const imgElement = document.createElement("img");
+      imgElement.src = post.imageUrl;
+      imgElement.alt = "Ảnh bài viết";
+      imgElement.style.width = "100%";
+      imgElement.style.borderRadius = "8px";
+      document.getElementById("content").prepend(imgElement);
+    }
   });
 
   // Xử lý like

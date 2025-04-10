@@ -65,7 +65,8 @@
     <input type="text" id="title" placeholder="Tiêu đề bài viết" required>
     <textarea id="content" placeholder="Nội dung bài viết" required></textarea>
     
-    <input type="file" id="imageInput" accept="image/*">
+    <!-- Thay đổi để cho phép chọn nhiều ảnh -->
+    <input type="file" id="imageInput" accept="image/*" multiple>
     
     <button type="submit">Đăng bài</button>
     <button type="button" id="logoutBtn">Đăng xuất</button>
@@ -123,16 +124,20 @@
   });
 
   // Upload ảnh lên Cloudinary
-  async function uploadImageToCloudinary(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', 'hoinham-upload'); // 👈 Preset bạn đã tạo
-    const response = await fetch('https://api.cloudinary.com/v1_1/dam3lcbwj/image/upload', {
-      method: 'POST',
-      body: formData
-    });
-    const data = await response.json();
-    return data.secure_url;
+  async function uploadImagesToCloudinary(files) {
+    const uploadedUrls = [];
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'hoinham-upload'); // 👈 Preset bạn đã tạo
+      const response = await fetch('https://api.cloudinary.com/v1_1/dam3lcbwj/image/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await response.json();
+      uploadedUrls.push(data.secure_url);
+    }
+    return uploadedUrls;
   }
 
   // Gửi bài viết
@@ -141,7 +146,7 @@
     e.preventDefault();
     const title = document.getElementById("title").value.trim();
     const content = document.getElementById("content").value.trim();
-    const imageFile = document.getElementById("imageInput").files[0];
+    const imageFiles = document.getElementById("imageInput").files;
     const user = auth.currentUser;
 
     if (!title || !content || !user) {
@@ -149,10 +154,10 @@
       return;
     }
 
-    let imageUrl = "";
-    if (imageFile) {
+    let imageUrls = [];
+    if (imageFiles.length > 0) {
       try {
-        imageUrl = await uploadImageToCloudinary(imageFile);
+        imageUrls = await uploadImagesToCloudinary(imageFiles);
       } catch (err) {
         console.error("Lỗi upload ảnh:", err);
         alert("Không thể upload ảnh.");
@@ -164,7 +169,7 @@
       await db.collection("posts").add({
         title,
         content,
-        imageUrl,
+        imageUrls, // Lưu một mảng URL ảnh
         author: user.displayName,
         email: user.email,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
