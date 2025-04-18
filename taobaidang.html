@@ -64,10 +64,7 @@
   <form id="postForm" style="display:none;">
     <input type="text" id="title" placeholder="Tiêu đề bài viết" required>
     <textarea id="content" placeholder="Nội dung bài viết" required></textarea>
-    
-    <!-- Thay đổi để cho phép chọn nhiều ảnh -->
     <input type="file" id="imageInput" accept="image/*" multiple>
-    
     <button type="submit">Đăng bài</button>
     <button type="button" id="logoutBtn">Đăng xuất</button>
   </form>
@@ -87,6 +84,8 @@
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
+
+  const allowedEmail = "huynhbinhan.n@gmail.com";
 
   // Login Google
   function loginWithGoogle() {
@@ -108,6 +107,11 @@
     const userInfo = document.getElementById("userInfo");
 
     if (user) {
+      if (user.email !== allowedEmail) {
+        alert("Tài khoản không được phép truy cập.");
+        auth.signOut();
+        return;
+      }
       postForm.style.display = "block";
       loginSection.style.display = "none";
       userInfo.innerHTML = `👤 Xin chào, <strong>${user.displayName}</strong>`;
@@ -129,7 +133,7 @@
     for (const file of files) {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', 'hoinham-upload'); // 👈 Preset bạn đã tạo
+      formData.append('upload_preset', 'hoinham-upload'); // 👈 Thay bằng preset của bạn
       const response = await fetch('https://api.cloudinary.com/v1_1/dam3lcbwj/image/upload', {
         method: 'POST',
         body: formData
@@ -169,7 +173,7 @@
       await db.collection("posts").add({
         title,
         content,
-        imageUrls, // Lưu một mảng URL ảnh
+        imageUrls,
         author: user.displayName,
         email: user.email,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()

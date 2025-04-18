@@ -1,38 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>@hoinhamo</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
-<script async defer crossorigin="anonymous" 
-  src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"></script>
-<script>
+  <title>@hoinhamo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+  <script async defer crossorigin="anonymous" 
+    src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"></script>
+  <script>
     window.fbAsyncInit = function() {
       FB.init({
         xfbml: true,
         version: 'v18.0'
       });
     };
-</script>
-<style>
-body, html {
-  height: 100%;
-  font-family: "Inconsolata", sans-serif;
-}
+  </script>
+  <style>
+    body, html {
+      height: 100%;
+      font-family: "Inconsolata", sans-serif;
+    }
 
-.bgimg {
-  background-position: center;
-  background-size: cover;
-  background-image: url("image-web/header2.jpg");
-  min-height: 75%;
-}
+    .bgimg {
+      background-position: center;
+      background-size: cover;
+      background-image: url("image-web/header2.jpg");
+      min-height: 75%;
+    }
 
-.menu {
-  display: none;
-}
-</style>
+    .menu {
+      display: none;
+    }
+
+    .contact-box {
+      max-width: 700px;
+      margin: 100px auto 50px;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: "Inconsolata", sans-serif;
+    }
+
+    .submit-btn {
+      background-color: #000;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .submit-btn:hover {
+      background-color: #444;
+    }
+
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 14px;
+      color: #777;
+    }
+  </style>
 </head>
 <body>
 
@@ -40,70 +78,39 @@ body, html {
 <div class="w3-top">
   <div class="w3-row w3-padding w3-black">
     <div class="w3-col s3">
-      <a href="index.html" class="w3-button w3-block w3-black">NHÀ</a>
+      <a href="index.html" class="w3-button w3-block w3-black">TRANG CHỦ</a>
     </div>
     <div class="w3-col s3">
-      <a href="about.html" class="w3-button w3-block w3-black">VỀ CHÚNG MÌNH</a>
+      <a href="viewpost.html" class="w3-button w3-block w3-black">BÀI ĐĂNG</a>
     </div>
     <div class="w3-col s3">
-      <a href="contact.html" class="w3-button w3-block w3-black">LIÊN KẾT</a>
+      <a href="policy.html" class="w3-button w3-block w3-black">CHÍNH SÁCH</a>
     </div>
     <div class="w3-col s3">
-      <a href="motime.html" class="w3-button w3-block w3-black">!ĐẶC BIỆT!</a>
+      <a href="contact.html" class="w3-button w3-block w3-black">LIÊN HỆ</a>
     </div>
   </div>
 </div>
 
-<!-- Add a background color and large text to the whole page -->
-<div class="w3-sand w3-grayscale w3-large">
+<!-- Nội dung trang liên hệ -->
+<div class="contact-box w3-animate-opacity">
+  <h2>📬 Liên hệ với chúng tôi</h2>
+  <p>Nếu bạn có bất kỳ thắc mắc, góp ý hay báo cáo.</p>
 
-<!-- About Container -->
-<div class="w3-container" id="about">
-    <div class="w3-content" style="max-width:700px">
-      <h5 class="w3-center w3-padding-64"><span class="w3-tag w3-wide">KẾT NỐI VỚI NGƯỜI MƠ</span></h5>
-      
-      <div class="w3-row-padding w3-center">
-        <div class="w3-col s6 m4 l3">
-          <a href="https://www.facebook.com/hoinhamo" target="_blank">
-            <img src="image-web/facebook-icon.png" alt="Facebook" style="width:100%; border-radius: 10px;">
-            <p>Facebook</p>
-          </a>
-        </div>
-        <div class="w3-col s6 m4 l3">
-          <a href="https://www.instagram.com/hoinhamo" target="_blank">
-            <img src="image-web/Instargam-logo.png" alt="Instagram" style="width:100%; border-radius: 10px;">
-            <p>Instagram</p>
-          </a>
-        </div>
-        <div class="w3-col s6 m4 l3">
-          <a href="https://www.tiktok.com/@hoinhamo" target="_blank">
-            <img src="image-web/Tiktok-logo.png" alt="TikTok" style="width:100%; border-radius: 10px;">
-            <p>TikTok</p>
-          </a>
-        </div>
-        <div class="w3-col s6 m4 l3">
-          <a href="https://www.youtube.com/c/hoinhamo" target="_blank">
-            <img src="image-web/youtobe-logo.jpg" alt="YouTube" style="width:100%; border-radius: 10px;">
-            <p>YouTube</p>
-          </a>
-        </div>
-      </div>
-    </div>
+  <form action="https://formspree.io/f/xblgvpdd" method="POST">
+    <label for="email">Email của bạn:</label>
+    <input type="email" id="email" name="email" placeholder="Nhập email của bạn..." required>
+
+    <label for="message">Nội dung:</label>
+    <textarea id="message" name="message" rows="5" placeholder="Bạn muốn nói điều gì?" required></textarea>
+
+    <button type="submit" class="submit-btn">Gửi liên hệ</button>
+  </form>
 </div>
 
-
-  <div class="w3-center w3-padding-64">
-    <a href="index.html" class="w3-button w3-black w3-padding-large w3-round">
-      VỀ NHÀ
-    </a>
-  </div>
-
-
-
-
-<!-- Footer -->
-<footer class="w3-center w3-light-grey w3-padding-48 w3-large">
-  <p>Template by w3.css and remake by @hoinhamo</a></p>
+<footer>
+  TRENDZ 2025.
 </footer>
+
 </body>
 </html>

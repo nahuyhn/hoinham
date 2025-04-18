@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>TRENDZ | CHÍNH SÁCH</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <style>
+    body {
+      max-width: 700px;
+      margin: auto;
+      font-family: "Inconsolata", sans-serif;
+      background-color: #f2f2f2;
+      padding: 20px;
+      padding-top: 56px;
+    }
+    .post {
+      border: 1px solid #ccc;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      background: #fff;
+      cursor: pointer;
+    }
+    .post img {
+      max-width: 100%;
+      margin-top: 10px;
+      border-radius: 6px;
+    }
+    .likes {
+      color: #ff6b6b;
+    }
+    .comments-count {
+      color: #777;
+    }
+    .nav-bar {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: #000;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 10;
+      justify-content: center !important;
+      left: 0 !important;
+    }
+    .nav-bar a {
+      color: white;
+      padding: 10px 16px;
+      text-decoration: none;
+      text-align: center;
+      flex: 1 1 auto;
+      min-width: 100px;
+    }
+    .nav-bar a:hover {
+      background-color: #333;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .pagination button {
+      padding: 8px 16px;
+      margin: 0 5px;
+      cursor: pointer;
+      background-color: #000;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    .pagination button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .policy-box {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+    }
+    .policy-box h2 {
+      color: #222;
+    }
+    .policy-box p {
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Thanh menu -->
+  <div class="nav-bar">
+    <a href="index.html">NHÀ</a>
+    <a href="viewpost.html">BÀI ĐĂNG</a>
+    <a href="policy.html">CHÍNH SÁCH</a>
+    <a href="contact.html">LIÊN HỆ</a>
+  </div>
+
+  <!-- Chính sách thông tin -->
+  <div class="policy-box">
+    <h2>📢 CHÍNH SÁCH THÔNG TIN & TỪ CHỐI TRÁCH NHIỆM</h2>
+    <p><strong>TRENDZ - CẬP NHẬT XU HƯỚNG MỖI NGÀY</strong> là nền tảng chia sẻ nội dung mang tính tham khảo, cập nhật và định hướng xu hướng. Tuy nhiên, tất cả thông tin đăng tải tại đây đều mang tính một chiều, được tổng hợp từ nhiều nguồn công khai, chưa được xác minh tuyệt đối.</p>
+    <p>Chúng tôi không chịu trách nhiệm về tính chính xác, đầy đủ hoặc cập nhật của nội dung. Người đọc cần chủ động kiểm chứng thông tin trước khi tin tưởng hoặc hành động dựa trên đó.</p>
+    <p>Mọi rủi ro, tổn thất hoặc thiệt hại phát sinh từ việc sử dụng thông tin tại TRENDZ sẽ do người đọc tự chịu trách nhiệm. Website <strong>không phải cơ quan báo chí</strong> và không có nghĩa vụ đảm bảo tính xác thực tuyệt đối cho mọi nội dung.</p>
+    <p>Việc tiếp tục sử dụng website đồng nghĩa với việc bạn đồng ý với điều khoản và từ chối trách nhiệm nêu trên. Hãy là người đọc thông thái và chủ động xác thực nội dung từ nhiều nguồn.</p>
+  </div>
+  <footer>
+    TRENDZ 2025.
+  </footer>
+</body>
+</html>

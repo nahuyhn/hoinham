@@ -1,4 +1,4 @@
-"<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
@@ -14,7 +14,7 @@
       font-family: "Inconsolata", sans-serif;
       background-color: #f2f2f2;
       padding: 20px;
-      padding-top: 56px; /* Giữ khoảng cho thanh menu */
+      padding-top: 56px;
     }
     .post {
       border: 1px solid #ccc;
@@ -23,7 +23,6 @@
       margin-bottom: 20px;
       background: #fff;
       cursor: pointer;
-      font-family: "Inconsolata", sans-serif;
     }
     .post img {
       max-width: 100%;
@@ -36,7 +35,6 @@
     .comments-count {
       color: #777;
     }
-    /* Thanh điều hướng */
     .nav-bar {
       display: flex;
       flex-wrap: wrap;
@@ -45,8 +43,8 @@
       top: 0;
       width: 100%;
       z-index: 10;
-      justify-content: center !important;
-      left: 0 !important;
+      justify-content: center;
+      left: 0;
     }
     .nav-bar a {
       color: white;
@@ -59,7 +57,6 @@
     .nav-bar a:hover {
       background-color: #333;
     }
-    /* Phân trang */
     .pagination {
       display: flex;
       justify-content: center;
@@ -78,21 +75,36 @@
       background-color: #ccc;
       cursor: not-allowed;
     }
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 14px;
+      color: #777;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Thanh menu -->
   <div class="nav-bar">
-    <a href="index.html">NHÀ</a>
+    <a href="index.html">TRANG CHỦ</a>
     <a href="viewpost.html">BÀI ĐĂNG</a>
-    <a href="test.html">VỀ CHÚNG MÌNH</a>
-    <a href="dangnhap.html">ĐĂNG NHẬP</a>
+    <a href="policy.html">CHÍNH SÁCH</a>
+    <a href="contact.html">LIÊN HỆ</a>
   </div>
 
   <div class="w3-content w3-padding" style="max-width:900px">
     <h2 class="w3-center">Bài viết từ cộng đồng Hội Nhà Mơ</h2>
+    <!-- Thanh tìm kiếm và sắp xếp -->
+    <div class="w3-center">
+      <input type="text" id="searchInput" placeholder="Tìm kiếm bài viết..." oninput="loadPosts()">
+      <select id="sortSelect" onchange="loadPosts()">
+        <option value="date">Sắp xếp theo ngày</option>
+        <option value="likes">Sắp xếp theo lượt thích</option>
+      </select>
+    </div>
+
     <div id="postsContainer"></div>
+
     <!-- Phân trang -->
     <div class="pagination">
       <button id="prevBtn" onclick="changePage('prev')" disabled>Trang trước</button>
@@ -112,87 +124,86 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-  
+
     let currentPage = 1;
     const pageSize = 5;
     const container = document.getElementById("postsContainer");
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
     const pageInfo = document.getElementById("pageInfo");
-  
-    // Lưu trữ các mốc đầu tiên và cuối cùng của mỗi trang
-    let firstVisibles = [null]; // null cho trang đầu tiên
-    let lastVisibles = []; // Lưu trữ tài liệu cuối cùng của mỗi trang
-  
+
+    let firstVisibles = [null];
+    let lastVisibles = [];
+
     function loadPosts(direction = 'next') {
-  let query = db.collection("posts")
-    .where("approved", "==", true)
-    .orderBy("createdAt", "desc")
-    .limit(pageSize);
+      const searchQuery = document.getElementById("searchInput").value.toLowerCase();
+      const sortBy = document.getElementById("sortSelect").value;
 
-  // Nếu không phải trang đầu tiên và đang tải trang tiếp theo
-  if (direction === 'next' && lastVisibles[currentPage - 1]) {
-    query = query.startAfter(lastVisibles[currentPage - 1]);
-  }
-  // Nếu là trang trước, sử dụng offset để bỏ qua các bài viết
-  else if (direction === 'prev' && currentPage > 1) {
-    query = query.startBefore(firstVisibles[currentPage - 1]);
-  }
+      let query = db.collection("posts")
+        .where("approved", "==", true)
+        .orderBy(sortBy === "likes" ? "likes" : "createdAt", "desc")
+        .limit(pageSize);
 
-  query.get().then(snapshot => {
-    container.innerHTML = ''; // Xóa các bài viết cũ
+      if (searchQuery) {
+        query = query.where("title", "array-contains", searchQuery);
+      }
 
-    if (snapshot.empty) {
-      container.innerHTML = "<p class='w3-center'>Không còn bài viết nào.</p>";
-      nextBtn.disabled = true;
-      prevBtn.disabled = currentPage === 1;
-      return;
+      if (direction === 'next' && lastVisibles[currentPage - 1]) {
+        query = query.startAfter(lastVisibles[currentPage - 1]);
+      } else if (direction === 'prev' && currentPage > 1) {
+        query = query.startBefore(firstVisibles[currentPage - 1]);
+      }
+
+      query.get().then(snapshot => {
+        container.innerHTML = '';
+
+        if (snapshot.empty) {
+          container.innerHTML = "<p class='w3-center'>Không còn bài viết nào.</p>";
+          nextBtn.disabled = true;
+          prevBtn.disabled = currentPage === 1;
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const postDiv = document.createElement("div");
+          postDiv.className = "post";
+          postDiv.innerHTML = `
+            <h3><a href="post.html?id=${doc.id}">${data.title}</a></h3>
+            <p>${data.content}</p>
+            ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Ảnh bài viết">` : ""}
+            <p><i>Đăng bởi ${data.author} - ${data.createdAt?.toDate().toLocaleString() || ""}</i></p>
+            <p><span class="likes">❤️ Lượt thích: ${data.likes || 0}</span></p>
+            <p class="comments-count">💬 Lượt bình luận: ${data.commentsCount || 0}</p>
+          `;
+          container.appendChild(postDiv);
+        });
+
+        if (direction === 'next' && snapshot.docs.length > 0) {
+          firstVisibles[currentPage] = snapshot.docs[0];
+          lastVisibles[currentPage] = snapshot.docs[snapshot.docs.length - 1];
+        }
+
+        prevBtn.disabled = currentPage === 0;
+        nextBtn.disabled = snapshot.size < pageSize;
+        pageInfo.textContent = `Trang ${currentPage}`;
+      }).catch(error => {
+        console.error("Lỗi khi tải bài viết:", error);
+        container.innerHTML = "<p class='w3-center'>Lỗi khi tải bài viết.</p>";
+      });
     }
 
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const postDiv = document.createElement("div");
-      postDiv.className = "post";
-      postDiv.innerHTML = `
-        <h3><a href="post.html?id=${doc.id}">${data.title}</a></h3>
-        <p>${data.content}</p>
-        ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Ảnh bài viết">` : ""}
-        <p><i>Đăng bởi ${data.author} - ${data.createdAt?.toDate().toLocaleString() || ""}</i></p>
-        <p><span class="likes">❤️ Lượt thích: ${data.likes || 0}</span></p>
-        <p class="comments-count">💬 Lượt bình luận: ${data.commentsCount || 0}</p>
-      `;
-      container.appendChild(postDiv);
-    });
-
-    // Lưu trữ mốc đầu tiên và cuối cùng của trang hiện tại
-    if (direction === 'next' && snapshot.docs.length > 0) {
-      firstVisibles[currentPage] = snapshot.docs[0];
-      lastVisibles[currentPage] = snapshot.docs[snapshot.docs.length - 1];
+    function changePage(direction) {
+      if (direction === 'next' && !nextBtn.disabled) {
+        currentPage++;
+        loadPosts('next');
+      } else if (direction === 'prev' && currentPage > 1) {
+        currentPage--;
+        loadPosts('prev');
+      }
     }
 
-    // Cập nhật trạng thái nút phân trang
-    prevBtn.disabled = currentPage === 0;
-    nextBtn.disabled = snapshot.size < pageSize;
-
-    // Cập nhật số trang
-    pageInfo.textContent = `Trang ${currentPage}`;
-  }).catch(error => {
-    console.error("Lỗi khi tải bài viết:", error);
-    container.innerHTML = "<p class='w3-center'>Lỗi khi tải bài viết.</p>";
-  });
-}
-
-function changePage(direction) {
-  if (direction === 'next' && !nextBtn.disabled) {
-    currentPage++;
-    loadPosts('next');
-  } else if (direction === 'prev' && currentPage > 1) {
-    currentPage--;
-    loadPosts('prev');
-  }
-}
-  // Tải bài viết lần đầu
-loadPosts();
+    loadPosts();
   </script>
 
 </body>
